@@ -1,9 +1,7 @@
-package com.toy.reservationlab.restaurant.entity;
+package com.toy.reservationlab.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -14,27 +12,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "restaurant")
+@Table(name = "`user`")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Restaurant {
+public class User {
 
     private static final String NOT_DELETED = "N";
     private static final String DELETED = "Y";
 
     @Id
-    @Column(name = "restaurant_id", length = 39, nullable = false)
-    private String restaurantId;
+    @Column(name = "user_id", length = 39, nullable = false)
+    private String userId;
 
-    @Column(name = "name", length = 100, nullable = false)
+    @Column(name = "name", length = 50, nullable = false)
     private String name;
 
-    @Column(name = "address", length = 255, nullable = false)
-    private String address;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
-    private RestaurantStatus status;
+    @Column(name = "phone", length = 20, nullable = false, unique = true)
+    private String phone;
 
     @Column(name = "del_yn", length = 1, nullable = false)
     private String delYn;
@@ -51,45 +45,32 @@ public class Restaurant {
     @Column(name = "updated_by", nullable = false)
     private String updatedBy;
 
-    private Restaurant(
-            String restaurantId,
+    private User(
+            String userId,
             String name,
-            String address,
-            RestaurantStatus status,
+            String phone,
             String createdBy
     ) {
-        this.restaurantId = restaurantId;
+        this.userId = userId;
         this.name = name;
-        this.address = address;
-        this.status = status;
+        this.phone = phone;
         this.delYn = NOT_DELETED;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
     }
 
-    public static Restaurant create(
-            String restaurantId,
+    public static User create(
+            String userId,
             String name,
-            String address,
-            RestaurantStatus status,
+            String phone,
             String createdBy
     ) {
-        return new Restaurant(restaurantId, name, address, status, createdBy);
+        return new User(userId, name, phone, createdBy);
     }
 
-    public boolean canCreateReservationSlot() {
-        return status == RestaurantStatus.OPEN && !isDeleted();
-    }
-
-    public void update(
-            String name,
-            String address,
-            RestaurantStatus status,
-            String updatedBy
-    ) {
+    public void update(String name, String phone, String updatedBy) {
         this.name = name;
-        this.address = address;
-        this.status = status;
+        this.phone = phone;
         this.updatedBy = updatedBy;
     }
 

@@ -1,4 +1,4 @@
-package com.toy.reservationlab.restaurant.entity;
+package com.toy.reservationlab.reservation.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,27 +14,30 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "restaurant")
+@Table(name = "reservation")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Restaurant {
+public class Reservation {
 
     private static final String NOT_DELETED = "N";
     private static final String DELETED = "Y";
 
     @Id
-    @Column(name = "restaurant_id", length = 39, nullable = false)
-    private String restaurantId;
+    @Column(name = "reservation_id", length = 39, nullable = false)
+    private String reservationId;
 
-    @Column(name = "name", length = 100, nullable = false)
-    private String name;
+    @Column(name = "slot_id", length = 39, nullable = false)
+    private String slotId;
 
-    @Column(name = "address", length = 255, nullable = false)
-    private String address;
+    @Column(name = "user_id", length = 39, nullable = false)
+    private String userId;
+
+    @Column(name = "party_size", nullable = false)
+    private int partySize;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
-    private RestaurantStatus status;
+    private ReservationStatus status;
 
     @Column(name = "del_yn", length = 1, nullable = false)
     private String delYn;
@@ -51,50 +54,42 @@ public class Restaurant {
     @Column(name = "updated_by", nullable = false)
     private String updatedBy;
 
-    private Restaurant(
-            String restaurantId,
-            String name,
-            String address,
-            RestaurantStatus status,
+    private Reservation(
+            String reservationId,
+            String slotId,
+            String userId,
+            int partySize,
+            ReservationStatus status,
             String createdBy
     ) {
-        this.restaurantId = restaurantId;
-        this.name = name;
-        this.address = address;
+        this.reservationId = reservationId;
+        this.slotId = slotId;
+        this.userId = userId;
+        this.partySize = partySize;
         this.status = status;
         this.delYn = NOT_DELETED;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
     }
 
-    public static Restaurant create(
-            String restaurantId,
-            String name,
-            String address,
-            RestaurantStatus status,
+    public static Reservation create(
+            String reservationId,
+            String slotId,
+            String userId,
+            int partySize,
+            ReservationStatus status,
             String createdBy
     ) {
-        return new Restaurant(restaurantId, name, address, status, createdBy);
-    }
-
-    public boolean canCreateReservationSlot() {
-        return status == RestaurantStatus.OPEN && !isDeleted();
-    }
-
-    public void update(
-            String name,
-            String address,
-            RestaurantStatus status,
-            String updatedBy
-    ) {
-        this.name = name;
-        this.address = address;
-        this.status = status;
-        this.updatedBy = updatedBy;
+        return new Reservation(reservationId, slotId, userId, partySize, status, createdBy);
     }
 
     public boolean isDeleted() {
         return DELETED.equals(delYn);
+    }
+
+    public void cancel(String updatedBy) {
+        this.status = ReservationStatus.CANCELLED;
+        this.updatedBy = updatedBy;
     }
 
     public void markDeleted(String updatedBy) {

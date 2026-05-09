@@ -1,4 +1,4 @@
-package com.toy.reservationlab.restaurant.entity;
+package com.toy.reservationlab.reservationslot.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,33 +8,40 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "restaurant")
+@Table(name = "reservation_slot")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Restaurant {
+public class ReservationSlot {
 
     private static final String NOT_DELETED = "N";
     private static final String DELETED = "Y";
 
     @Id
+    @Column(name = "slot_id", length = 39, nullable = false)
+    private String slotId;
+
     @Column(name = "restaurant_id", length = 39, nullable = false)
     private String restaurantId;
 
-    @Column(name = "name", length = 100, nullable = false)
-    private String name;
+    @Column(name = "slot_date", nullable = false)
+    private LocalDate slotDate;
 
-    @Column(name = "address", length = 255, nullable = false)
-    private String address;
+    @Column(name = "slot_time", length = 5, nullable = false)
+    private String slotTime;
+
+    @Column(name = "capacity", nullable = false)
+    private int capacity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
-    private RestaurantStatus status;
+    private ReservationSlotStatus status;
 
     @Column(name = "del_yn", length = 1, nullable = false)
     private String delYn;
@@ -51,44 +58,62 @@ public class Restaurant {
     @Column(name = "updated_by", nullable = false)
     private String updatedBy;
 
-    private Restaurant(
+    private ReservationSlot(
+            String slotId,
             String restaurantId,
-            String name,
-            String address,
-            RestaurantStatus status,
+            LocalDate slotDate,
+            String slotTime,
+            int capacity,
+            ReservationSlotStatus status,
             String createdBy
     ) {
+        this.slotId = slotId;
         this.restaurantId = restaurantId;
-        this.name = name;
-        this.address = address;
+        this.slotDate = slotDate;
+        this.slotTime = slotTime;
+        this.capacity = capacity;
         this.status = status;
         this.delYn = NOT_DELETED;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
     }
 
-    public static Restaurant create(
+    public static ReservationSlot create(
+            String slotId,
             String restaurantId,
-            String name,
-            String address,
-            RestaurantStatus status,
+            LocalDate slotDate,
+            String slotTime,
+            int capacity,
+            ReservationSlotStatus status,
             String createdBy
     ) {
-        return new Restaurant(restaurantId, name, address, status, createdBy);
+        return new ReservationSlot(slotId, restaurantId, slotDate, slotTime, capacity, status, createdBy);
     }
 
-    public boolean canCreateReservationSlot() {
-        return status == RestaurantStatus.OPEN && !isDeleted();
+    public boolean canCreateReservation() {
+        return status == ReservationSlotStatus.AVAILABLE && !isDeleted();
+    }
+
+    public boolean isFull() {
+        return status == ReservationSlotStatus.FULL;
+    }
+
+    public boolean isReducingCapacity(int capacity) {
+        return capacity < this.capacity;
     }
 
     public void update(
-            String name,
-            String address,
-            RestaurantStatus status,
+            String restaurantId,
+            LocalDate slotDate,
+            String slotTime,
+            int capacity,
+            ReservationSlotStatus status,
             String updatedBy
     ) {
-        this.name = name;
-        this.address = address;
+        this.restaurantId = restaurantId;
+        this.slotDate = slotDate;
+        this.slotTime = slotTime;
+        this.capacity = capacity;
         this.status = status;
         this.updatedBy = updatedBy;
     }

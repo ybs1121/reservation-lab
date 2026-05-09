@@ -1,7 +1,9 @@
 package com.toy.reservationlab.restaurant.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,5 +71,56 @@ class RestaurantControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("식당을 찾을 수 없습니다."))
                 .andExpect(jsonPath("$.code").value("RST00001"));
+    }
+
+    @Test
+    void 식당을_수정하면_식당_응답을_반환한다() throws Exception {
+        restaurantService.createRestaurant(
+                "restaurant-controller-3",
+                "수정 전 식당",
+                "서울시 강남구",
+                RestaurantStatus.OPEN,
+                "user-1"
+        );
+
+        mockMvc.perform(put("/restaurants/restaurant-controller-3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "수정 후 식당",
+                                  "address": "서울시 마포구",
+                                  "status": "CLOSED",
+                                  "updatedBy": "user-2"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.restaurantId").value("restaurant-controller-3"))
+                .andExpect(jsonPath("$.data.name").value("수정 후 식당"))
+                .andExpect(jsonPath("$.data.address").value("서울시 마포구"))
+                .andExpect(jsonPath("$.data.status").value("CLOSED"));
+    }
+
+    @Test
+    void 식당을_삭제하면_삭제된_식당_응답을_반환한다() throws Exception {
+        restaurantService.createRestaurant(
+                "restaurant-controller-4",
+                "삭제 식당",
+                "서울시 강남구",
+                RestaurantStatus.OPEN,
+                "user-1"
+        );
+
+        mockMvc.perform(delete("/restaurants/restaurant-controller-4")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "updatedBy": "user-2"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.restaurantId").value("restaurant-controller-4"))
+                .andExpect(jsonPath("$.data.delYn").value("Y"));
     }
 }
