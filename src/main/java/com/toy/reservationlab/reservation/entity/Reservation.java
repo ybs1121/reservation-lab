@@ -87,6 +87,25 @@ public class Reservation {
         return DELETED.equals(delYn);
     }
 
+    public boolean isConfirmed() {
+        return status == ReservationStatus.CONFIRMED;
+    }
+
+    public boolean canChangeStatusTo(ReservationStatus status) {
+        return isConfirmed()
+                && (status == ReservationStatus.CANCELLED || status == ReservationStatus.NO_SHOW);
+    }
+
+    public boolean isActivePartySizeTarget() {
+        return !isDeleted()
+                && (status == ReservationStatus.CONFIRMED || status == ReservationStatus.NO_SHOW);
+    }
+
+    public void changeStatus(ReservationStatus status, String updatedBy) {
+        this.status = status;
+        this.updatedBy = updatedBy;
+    }
+
     public void cancel(String updatedBy) {
         this.status = ReservationStatus.CANCELLED;
         this.updatedBy = updatedBy;

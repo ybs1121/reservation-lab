@@ -94,12 +94,30 @@ public class ReservationSlot {
         return status == ReservationSlotStatus.AVAILABLE && !isDeleted();
     }
 
+    public boolean hasCapacityFor(int activePartySize, int partySize) {
+        return activePartySize + partySize <= capacity;
+    }
+
     public boolean isFull() {
         return status == ReservationSlotStatus.FULL;
     }
 
     public boolean isReducingCapacity(int capacity) {
         return capacity < this.capacity;
+    }
+
+    public void markFullIfCapacityReached(int activePartySize, String updatedBy) {
+        if (activePartySize >= capacity) {
+            this.status = ReservationSlotStatus.FULL;
+            this.updatedBy = updatedBy;
+        }
+    }
+
+    public void restoreAvailableIfNotFull(int activePartySize, String updatedBy) {
+        if (isFull() && activePartySize < capacity) {
+            this.status = ReservationSlotStatus.AVAILABLE;
+            this.updatedBy = updatedBy;
+        }
     }
 
     public void update(

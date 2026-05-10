@@ -1,5 +1,8 @@
 package com.toy.reservationlab.restaurant.service;
 
+import static com.toy.reservationlab.common.component.ErrorCode.FUTURE_RESERVATION_EXISTS;
+import static com.toy.reservationlab.common.component.ErrorCode.RESTAURANT_NOT_FOUND;
+
 import com.toy.reservationlab.common.component.BizException;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
 import com.toy.reservationlab.restaurant.entity.Restaurant;
@@ -14,9 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RestaurantService {
-
-    private static final String RESTAURANT_NOT_FOUND = "RST00001";
-    private static final String FUTURE_RESERVATION_EXISTS = "RST00002";
 
     private final RestaurantRepository restaurantRepository;
     private final ReservationRepository reservationRepository;

@@ -8,14 +8,13 @@ public class BizException extends RuntimeException {
     private final String code;
     private final Object[] args;
 
-    public BizException(String code) {
-        this(code, null);
+    public BizException(ErrorCode errorCode) {
+        this(errorCode, null);
     }
 
-    public BizException(String code, Object[] args) {
-        super(code);
-        this.code = code;
+    public BizException(ErrorCode errorCode, Object[] args) {
+        super(errorCode.getCode());
+        this.code = errorCode.getCode();
         this.args = args;
     }
 }
-

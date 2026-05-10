@@ -1,11 +1,16 @@
 package com.toy.reservationlab.user.service;
 
+import static com.toy.reservationlab.common.component.ErrorCode.DUPLICATE_PHONE;
+import static com.toy.reservationlab.common.component.ErrorCode.USER_NOT_FOUND;
+
 import com.toy.reservationlab.common.component.BizException;
 import com.toy.reservationlab.reservation.entity.Reservation;
 import com.toy.reservationlab.reservation.entity.ReservationStatus;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
+import com.toy.reservationlab.reservationslot.repository.ReservationSlotRepository;
 import com.toy.reservationlab.user.entity.User;
 import com.toy.reservationlab.user.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private static final String NOT_DELETED = "N";
-    private static final String USER_NOT_FOUND = "USR00001";
-    private static final String DUPLICATE_PHONE = "USR00002";
+    private static final List<ReservationStatus> ACTIVE_PARTY_SIZE_STATUSES = List.of(
+            ReservationStatus.CONFIRMED,
+            ReservationStatus.NO_SHOW
+    );
 
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
     @Transactional
     public User createUser(String userId, String name, String phone, String createdBy) {
@@ -69,7 +77,16 @@ public class UserService {
                 ReservationStatus.CONFIRMED,
                 NOT_DELETED
         )) {
+            long activePartySize = reservationRepository.sumPartySizeBySlotIdAndStatuses(
+                    reservation.getSlotId(),
+                    ACTIVE_PARTY_SIZE_STATUSES
+            );
             reservation.cancel(updatedBy);
+            reservationSlotRepository.findById(reservation.getSlotId())
+                    .ifPresent(slot -> slot.restoreAvailableIfNotFull(
+                            (int) activePartySize - reservation.getPartySize(),
+                            updatedBy
+                    ));
         }
     }
 

@@ -51,6 +51,8 @@
 - 사용자에게 노출할 에러 메시지는 messages.properties에 정의한다
 - 에러 메시지는 한글로 관리한다
 - 코드에서 메시지 문자열을 직접 하드코딩하지 않는다
+- Java 코드에서 에러 코드는 `ErrorCode` enum으로 참조한다
+- `messages.properties`의 키는 `ErrorCode` enum의 code 값과 1:1로 매핑한다
 - 에러 코드 원칙
 - BizException의 에러 코드는 8자리로 제한한다. (영어 대무나 3글자 + 숫자 5글자)
 - 에러 코드는 도메인의 약어를 만들어서 넣는다. (User일 경우 USR)

@@ -1,12 +1,21 @@
 package com.toy.reservationlab.reservationslot.service;
 
+import static com.toy.reservationlab.common.component.ErrorCode.CANNOT_CREATE_RESERVATION_SLOT;
+import static com.toy.reservationlab.common.component.ErrorCode.CANNOT_REDUCE_FULL_SLOT_CAPACITY;
+import static com.toy.reservationlab.common.component.ErrorCode.CONFIRMED_RESERVATION_EXISTS;
+import static com.toy.reservationlab.common.component.ErrorCode.DUPLICATE_RESERVATION_SLOT;
+import static com.toy.reservationlab.common.component.ErrorCode.PAST_SLOT_DATE;
+import static com.toy.reservationlab.common.component.ErrorCode.RESERVATION_SLOT_NOT_FOUND;
+import static com.toy.reservationlab.common.component.ErrorCode.RESTAURANT_NOT_FOUND;
+
 import com.toy.reservationlab.common.component.BizException;
 import com.toy.reservationlab.reservation.entity.ReservationStatus;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
 import com.toy.reservationlab.reservationslot.entity.ReservationSlot;
 import com.toy.reservationlab.reservationslot.entity.ReservationSlotStatus;
 import com.toy.reservationlab.reservationslot.repository.ReservationSlotRepository;
-import com.toy.reservationlab.restaurant.service.RestaurantService;
+import com.toy.reservationlab.restaurant.entity.Restaurant;
+import com.toy.reservationlab.restaurant.repository.RestaurantRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,16 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservationSlotService {
 
     private static final String NOT_DELETED = "N";
-    private static final String RESERVATION_SLOT_NOT_FOUND = "RSL00001";
-    private static final String CANNOT_CREATE_RESERVATION_SLOT = "RSL00002";
-    private static final String PAST_SLOT_DATE = "RSL00003";
-    private static final String DUPLICATE_RESERVATION_SLOT = "RSL00004";
-    private static final String CANNOT_REDUCE_FULL_SLOT_CAPACITY = "RSL00005";
-    private static final String CONFIRMED_RESERVATION_EXISTS = "RSL00006";
 
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationRepository reservationRepository;
-    private final RestaurantService restaurantService;
+    private final RestaurantRepository restaurantRepository;
 
     @Transactional
     public ReservationSlot createReservationSlot(
@@ -91,7 +94,9 @@ public class ReservationSlotService {
     }
 
     private void validateCreatableRestaurant(String restaurantId) {
-        if (!restaurantService.canCreateReservationSlot(restaurantId)) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new BizException(RESTAURANT_NOT_FOUND));
+        if (!restaurant.canCreateReservationSlot()) {
             throw new BizException(CANNOT_CREATE_RESERVATION_SLOT);
         }
     }
