@@ -8,6 +8,7 @@ import static com.toy.reservationlab.common.component.ErrorCode.INVALID_RESERVAT
 import static com.toy.reservationlab.common.component.ErrorCode.RESERVATION_NOT_FOUND;
 
 import com.toy.reservationlab.common.component.BizException;
+import com.toy.reservationlab.common.component.DistributedLock;
 import com.toy.reservationlab.reservation.entity.Reservation;
 import com.toy.reservationlab.reservation.entity.ReservationStatus;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
@@ -35,6 +36,7 @@ public class ReservationService {
     private final UserRepository userRepository;
 
     @Transactional
+    @DistributedLock(key = "'lock:reservation:slot:' + #slotId")
     public Reservation createReservation(
             String reservationId,
             String slotId,

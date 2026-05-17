@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 
     UNKNOWN_ERROR("COM00001"),
+    LOCK_ACQUIRE_FAILED("COM00002"),
 
     RESTAURANT_NOT_FOUND("RST00001"),
     FUTURE_RESERVATION_EXISTS("RST00002"),

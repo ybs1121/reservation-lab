@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__mysql-reservation-lab__mysql_query"
+    ]
+  }
+}
