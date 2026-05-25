@@ -6,7 +6,7 @@
 
 ## 현재 단계
 
-**1단계 완료**
+**2단계 진행 중**
 
 ---
 
@@ -83,6 +83,18 @@ assertThat(reservationRepository.countConfirmed(slotId)).isEqualTo(1);
 - TTL 만료 시점 race condition 확인
 
 **완료 기준:** 임시 점유 TTL 내에 확정하면 예약 성공, 만료 시 슬롯이 자동 해제된다
+
+**진행 결과**
+- [x] Redis TTL 기반 ReservationHold 정책 정리
+- [x] 임시 점유 생성/조회/해제 API 추가
+- [x] 임시 점유 확정 API 추가
+- [x] 기존 직접 예약 생성 API 비활성화
+- [x] 사용자별 active hold 최대 3개 제한 적용
+- [x] hold 응답에 남은 TTL 포함
+- [x] hold 생성과 확정에 슬롯 단위 분산락 재사용
+- [x] Testcontainers Redis 기반 테스트 작성
+- [x] Docker 실행 환경에서 Testcontainers Redis 테스트 실행 확인
+- [ ] TTL 만료 시점 race condition 테스트 보강
 
 ---
 

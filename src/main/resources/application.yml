@@ -30,6 +30,10 @@ spring:
 reservation-lab:
   distributed-lock:
     enabled: false
+  reservation-hold:
+    enabled: false
+    ttl-seconds: 300
+    user-active-hold-max-count: 3
 
 ---
 
@@ -64,3 +68,7 @@ spring:
 reservation-lab:
   distributed-lock:
     enabled: true
+  reservation-hold:
+    enabled: true
+    ttl-seconds: 300
+    user-active-hold-max-count: 3

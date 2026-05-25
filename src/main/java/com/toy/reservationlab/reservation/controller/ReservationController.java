@@ -1,7 +1,9 @@
 package com.toy.reservationlab.reservation.controller;
 
+import static com.toy.reservationlab.common.component.ErrorCode.DIRECT_RESERVATION_NOT_ALLOWED;
+
 import com.toy.reservationlab.common.component.ApiResponse;
-import com.toy.reservationlab.reservation.dto.ReservationCreateRequest;
+import com.toy.reservationlab.common.component.BizException;
 import com.toy.reservationlab.reservation.dto.ReservationDeleteRequest;
 import com.toy.reservationlab.reservation.dto.ReservationResponse;
 import com.toy.reservationlab.reservation.dto.ReservationUpdateRequest;
@@ -25,15 +27,8 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ApiResponse<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
-        Reservation reservation = reservationService.createReservation(
-                request.reservationId(),
-                request.slotId(),
-                request.userId(),
-                request.partySize(),
-                request.createdBy()
-        );
-        return ApiResponse.success(ReservationResponse.from(reservation));
+    public ApiResponse<Void> createReservation() {
+        throw new BizException(DIRECT_RESERVATION_NOT_ALLOWED);
     }
 
     @GetMapping("/{reservationId}")
