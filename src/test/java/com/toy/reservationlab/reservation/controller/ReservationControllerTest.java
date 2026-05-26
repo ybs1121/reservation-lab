@@ -41,7 +41,7 @@ class ReservationControllerTest {
     private ReservationService reservationService;
 
     @Test
-    void 예약을_생성하면_예약_응답을_반환한다() throws Exception {
+    void 예약_직접_생성_API는_지원하지_않는다() throws Exception {
         createUser("reservation-controller-user-1", "010-4000-0001");
         createSlot("reservation-controller-restaurant-1", "reservation-controller-slot-1", 4);
 
@@ -56,11 +56,9 @@ class ReservationControllerTest {
                                   "createdBy": "reservation-controller-user-1"
                                 }
                                 """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.reservationId").value("reservation-controller-1"))
-                .andExpect(jsonPath("$.data.status").value("CONFIRMED"))
-                .andExpect(jsonPath("$.data.delYn").value("N"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("RSV00007"));
     }
 
     @Test

@@ -1,11 +1,13 @@
 package com.toy.reservationlab.restaurant.controller;
 
 import com.toy.reservationlab.common.component.ApiResponse;
+import com.toy.reservationlab.restaurant.dto.PopularRestaurantsResponse;
 import com.toy.reservationlab.restaurant.dto.RestaurantCreateRequest;
 import com.toy.reservationlab.restaurant.dto.RestaurantDeleteRequest;
 import com.toy.reservationlab.restaurant.dto.RestaurantResponse;
 import com.toy.reservationlab.restaurant.dto.RestaurantUpdateRequest;
 import com.toy.reservationlab.restaurant.entity.Restaurant;
+import com.toy.reservationlab.restaurant.service.PopularRestaurantService;
 import com.toy.reservationlab.restaurant.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+    private final PopularRestaurantService popularRestaurantService;
 
     @PostMapping
     public ApiResponse<RestaurantResponse> createRestaurant(@RequestBody RestaurantCreateRequest request) {
@@ -40,6 +44,14 @@ public class RestaurantController {
     public ApiResponse<RestaurantResponse> getRestaurant(@PathVariable String restaurantId) {
         Restaurant restaurant = restaurantService.getRestaurant(restaurantId);
         return ApiResponse.success(RestaurantResponse.from(restaurant));
+    }
+
+    @GetMapping("/popular")
+    public ApiResponse<PopularRestaurantsResponse> getPopularRestaurants(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Integer recentDays
+    ) {
+        return ApiResponse.success(popularRestaurantService.getPopularRestaurants(limit, recentDays));
     }
 
     @PutMapping("/{restaurantId}")

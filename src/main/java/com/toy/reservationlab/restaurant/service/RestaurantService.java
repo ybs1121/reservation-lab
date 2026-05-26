@@ -5,6 +5,7 @@ import static com.toy.reservationlab.common.component.ErrorCode.RESTAURANT_NOT_F
 
 import com.toy.reservationlab.common.component.BizException;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
+import com.toy.reservationlab.restaurant.component.PopularRestaurantCacheEvictor;
 import com.toy.reservationlab.restaurant.entity.Restaurant;
 import com.toy.reservationlab.restaurant.entity.RestaurantStatus;
 import com.toy.reservationlab.restaurant.repository.RestaurantRepository;
@@ -20,6 +21,7 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final ReservationRepository reservationRepository;
+    private final PopularRestaurantCacheEvictor popularRestaurantCacheEvictor;
 
     @Transactional
     public Restaurant createRestaurant(
@@ -47,6 +49,8 @@ public class RestaurantService {
     ) {
         Restaurant restaurant = findRestaurant(restaurantId);
         restaurant.update(name, address, status, updatedBy);
+        // 기존 인기 목록에 노출된 식당 정보나 OPEN 여부가 바뀔 수 있어 무효화한다.
+        popularRestaurantCacheEvictor.evictAll();
         return restaurant;
     }
 
@@ -57,6 +61,8 @@ public class RestaurantService {
             throw new BizException(FUTURE_RESERVATION_EXISTS);
         }
         restaurant.markDeleted(updatedBy);
+        // 삭제된 식당은 인기 목록에서 제외되어야 하므로 캐시를 비운다.
+        popularRestaurantCacheEvictor.evictAll();
         return restaurant;
     }
 

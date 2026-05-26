@@ -8,7 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.toy.reservationlab.restaurant.entity.RestaurantStatus;
+import com.toy.reservationlab.reservation.service.ReservationService;
+import com.toy.reservationlab.reservationslot.entity.ReservationSlotStatus;
+import com.toy.reservationlab.reservationslot.service.ReservationSlotService;
 import com.toy.reservationlab.restaurant.service.RestaurantService;
+import com.toy.reservationlab.user.service.UserService;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +30,15 @@ class RestaurantControllerTest {
 
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private ReservationSlotService reservationSlotService;
+
+    @Autowired
+    private ReservationService reservationService;
+
+    @Autowired
+    private UserService userService;
 
     @Test
     void 식당을_생성하면_식당_응답을_반환한다() throws Exception {
@@ -71,6 +85,44 @@ class RestaurantControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("식당을 찾을 수 없습니다."))
                 .andExpect(jsonPath("$.code").value("RST00001"));
+    }
+
+    @Test
+    void 인기_식당을_조회하면_전체기간과_최근_인기_응답을_반환한다() throws Exception {
+        restaurantService.createRestaurant(
+                "controller-popular-1",
+                "인기 식당",
+                "서울시 강남구",
+                RestaurantStatus.OPEN,
+                "user-1"
+        );
+        reservationSlotService.createReservationSlot(
+                "controller-popular-slot-1",
+                "controller-popular-1",
+                LocalDate.now().plusDays(1),
+                "18:00",
+                2,
+                ReservationSlotStatus.AVAILABLE,
+                "user-1"
+        );
+        userService.createUser("controller-popular-user-1", "인기 사용자", "010-4100-1001", "user-1");
+        reservationService.createReservation(
+                "controller-popular-rsv-1",
+                "controller-popular-slot-1",
+                "controller-popular-user-1",
+                1,
+                "user-1"
+        );
+
+        mockMvc.perform(get("/restaurants/popular")
+                        .param("limit", "10")
+                        .param("recentDays", "7"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.allTime[0].restaurantId").value("controller-popular-1"))
+                .andExpect(jsonPath("$.data.allTime[0].reservationCount").value(1))
+                .andExpect(jsonPath("$.data.recent[0].restaurantId").value("controller-popular-1"))
+                .andExpect(jsonPath("$.data.recent[0].reservationCount").value(1));
     }
 
     @Test

@@ -14,6 +14,8 @@
 - Spring Boot 4.0.6
 - Spring Web MVC
 - Spring Data JPA
+- Redis
+- Redisson
 - H2 Database
 - Lombok
 - Gradle
@@ -31,11 +33,20 @@
 
 ## 현재 단계
 
-**0단계 — 기반 세팅**
+**3단계 — 인기 음식점 조회 트래픽이 DB를 때리는 문제 해결 진행 중**
 
-- 프로젝트 초기화
-- 도메인 정의 (별도 문서)
-- 기본 CRUD / 예약 API
+- 0단계 기반 세팅 완료
+- 1단계 Redisson 분산락 적용 완료
+- Redis TTL 기반 임시 점유 API 추가
+- hold 생성/조회/해제/확정 API 추가
+- 예약 직접 생성 API 비활성화
+- 사용자별 active hold 최대 3개 제한 적용
+- hold 응답에 남은 TTL 포함
+- Testcontainers Redis 테스트 작성 및 실행 확인 완료
+- TTL 만료 시점 race condition 테스트 보강 완료
+- 전체 기간/최근 N일 인기 음식점 조회 API 추가
+- Spring Cache + Redis 기반 인기 음식점 캐시 적용
+- Restaurant/Reservation 변경 시 인기 음식점 캐시 무효화 적용
 
 > 단계가 끝날 때마다 이 섹션을 갱신합니다. 다음 단계로 넘어가기 전까지 다른 단계의 작업을 시작하지 않습니다.
 
