@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Local docs ###
+docs/blog/
+docs/next-tasks.md
