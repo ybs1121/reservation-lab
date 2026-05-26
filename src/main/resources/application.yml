@@ -34,6 +34,8 @@ reservation-lab:
     enabled: false
     ttl-seconds: 300
     user-active-hold-max-count: 3
+  popular-restaurant-cache:
+    enabled: false
 
 ---
 
@@ -63,7 +65,7 @@ spring:
       timeout: 3s
   sql:
     init:
-      mode: always
+      mode: never
 
 reservation-lab:
   distributed-lock:
@@ -72,3 +74,5 @@ reservation-lab:
     enabled: true
     ttl-seconds: 300
     user-active-hold-max-count: 3
+  popular-restaurant-cache:
+    enabled: true

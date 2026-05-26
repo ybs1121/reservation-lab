@@ -1,7 +1,7 @@
 -- ===========================================
 -- 샘플 데이터: User (20건)
 -- ===========================================
-INSERT INTO `user` (user_id, name, phone, del_yn, created_at, created_by, updated_at, updated_by) VALUES
+INSERT IGNORE INTO `user` (user_id, name, phone, del_yn, created_at, created_by, updated_at, updated_by) VALUES
 ('USR-20260510-000000001', '김민수', '010-1234-5678', 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM'),
 ('USR-20260510-000000002', '이서연', '010-2345-6789', 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM'),
 ('USR-20260510-000000003', '박지훈', '010-3456-7890', 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM'),
@@ -26,7 +26,7 @@ INSERT INTO `user` (user_id, name, phone, del_yn, created_at, created_by, update
 -- ===========================================
 -- 샘플 데이터: Restaurant (15건)
 -- ===========================================
-INSERT INTO `restaurant` (restaurant_id, name, address, status, del_yn, created_at, created_by, updated_at, updated_by) VALUES
+INSERT IGNORE INTO `restaurant` (restaurant_id, name, address, status, del_yn, created_at, created_by, updated_at, updated_by) VALUES
 ('RST-20260510-000000001', '스시오마카세 하루', '서울특별시 강남구 테헤란로 123', 'OPEN', 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM'),
 ('RST-20260510-000000002', '트라토리아 벨라', '서울특별시 마포구 와우산로 45', 'OPEN', 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM'),
 ('RST-20260510-000000003', '한우명가', '서울특별시 종로구 삼청로 67', 'OPEN', 'N', NOW(), 'SYSTEM', NOW(), 'SYSTEM'),

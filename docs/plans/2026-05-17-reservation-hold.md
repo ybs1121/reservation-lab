@@ -324,4 +324,4 @@ GET /reservation-holds/{holdId}
 - [x] Testcontainers Redis 기반 서비스/컨트롤러 테스트 추가
 - [x] `./gradlew.bat test` 통과
 - [x] Docker 실행 환경에서 Testcontainers Redis 테스트 실행 확인
-- [ ] TTL 만료 시점 race condition 테스트는 추가 보강 필요
+- [x] TTL 만료 시점 race condition 테스트 보강

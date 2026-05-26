@@ -14,6 +14,7 @@ import com.toy.reservationlab.reservation.entity.ReservationStatus;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
 import com.toy.reservationlab.reservationslot.entity.ReservationSlot;
 import com.toy.reservationlab.reservationslot.repository.ReservationSlotRepository;
+import com.toy.reservationlab.restaurant.component.PopularRestaurantCacheEvictor;
 import com.toy.reservationlab.user.entity.User;
 import com.toy.reservationlab.user.repository.UserRepository;
 import java.util.List;
@@ -34,6 +35,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final UserRepository userRepository;
+    private final PopularRestaurantCacheEvictor popularRestaurantCacheEvictor;
 
     @Transactional
     @DistributedLock(key = "'lock:reservation:slot:' + #slotId")
@@ -63,6 +65,8 @@ public class ReservationService {
         );
         Reservation savedReservation = reservationRepository.save(reservation);
         slot.markFullIfCapacityReached((int) activePartySize + partySize, createdBy);
+        // 예약 생성은 전체/최근 인기 순위를 바꿀 수 있어 인기 캐시를 무효화한다.
+        popularRestaurantCacheEvictor.evictAll();
         return savedReservation;
     }
 
@@ -83,10 +87,14 @@ public class ReservationService {
 
         if (status == ReservationStatus.CANCELLED) {
             cancelReservation(reservation, updatedBy);
+            // 인기 기준에서 빠지는 상태 전환이라 캐시된 순위를 다시 계산해야 한다.
+            popularRestaurantCacheEvictor.evictAll();
             return reservation;
         }
 
         reservation.changeStatus(status, updatedBy);
+        // NO_SHOW도 인기 기준에 포함하지만, 상태 정책 변경 가능성을 고려해 쓰기 시점에 비운다.
+        popularRestaurantCacheEvictor.evictAll();
         return reservation;
     }
 
@@ -97,6 +105,8 @@ public class ReservationService {
             cancelReservation(reservation, updatedBy);
         }
         reservation.markDeleted(updatedBy);
+        // 삭제된 예약은 인기 계산에서 제외되므로 캐시를 무효화한다.
+        popularRestaurantCacheEvictor.evictAll();
         return reservation;
     }
 

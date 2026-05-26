@@ -6,7 +6,7 @@
 
 ## 현재 단계
 
-**2단계 진행 중**
+**3단계 진행 중**
 
 ---
 
@@ -94,7 +94,7 @@ assertThat(reservationRepository.countConfirmed(slotId)).isEqualTo(1);
 - [x] hold 생성과 확정에 슬롯 단위 분산락 재사용
 - [x] Testcontainers Redis 기반 테스트 작성
 - [x] Docker 실행 환경에서 Testcontainers Redis 테스트 실행 확인
-- [ ] TTL 만료 시점 race condition 테스트 보강
+- [x] TTL 만료 시점 race condition 테스트 보강
 
 ---
 
@@ -111,6 +111,14 @@ assertThat(reservationRepository.countConfirmed(slotId)).isEqualTo(1);
 - 음식점 정보 변경 시 캐시 무효화 확인
 
 **완료 기준:** 반복 조회 시 DB가 아닌 캐시에서 응답한다
+
+**진행 결과**
+- [x] 전체 기간/최근 N일 인기 음식점 조회 기준 확정
+- [x] `GET /restaurants/popular?limit=10&recentDays=7` API 추가
+- [x] Spring Cache + Redis 기반 인기 음식점 캐시 적용
+- [x] Restaurant 수정/삭제, Reservation 생성/상태 변경/삭제 시 캐시 무효화 적용
+- [x] Testcontainers Redis 기반 cache hit/miss 테스트 작성
+- [x] 전체 테스트 통과 확인
 
 ---
 

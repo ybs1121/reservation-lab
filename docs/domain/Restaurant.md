@@ -35,6 +35,12 @@ Restaurant의 상태값은 아래 세 가지만 사용한다.
 - `CLOSED` 상태의 Restaurant에는 예약 슬롯을 생성할 수 없다.
 - `SUSPENDED` 상태의 Restaurant에는 예약 슬롯을 생성할 수 없다.
 - 삭제된 Restaurant은 예약 슬롯 생성 대상에서 제외한다.
+- 인기 음식점 조회 대상은 삭제되지 않은 `OPEN` 상태 Restaurant으로 제한한다.
+- 전체 기간 인기 음식점은 삭제되지 않은 `CONFIRMED`, `NO_SHOW` 예약 건수 기준으로 계산한다.
+- 최근 인기 음식점은 최근 N일 안에 생성된 삭제되지 않은 `CONFIRMED`, `NO_SHOW` 예약 건수 기준으로 계산한다.
+- `CANCELLED` 예약과 삭제된 예약은 인기 음식점 계산에서 제외한다.
+- Restaurant 생성은 예약 건수가 0이므로 인기 음식점 캐시 무효화 대상이 아니다.
+- Restaurant 수정/삭제와 Reservation 생성/상태 변경/삭제는 인기 음식점 캐시 무효화 대상이다.
 
 ## 삭제 정책
 
