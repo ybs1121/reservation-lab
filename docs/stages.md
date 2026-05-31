@@ -6,7 +6,7 @@
 
 ## 현재 단계
 
-**3단계 진행 중**
+**4단계 완료, 5단계 준비 중**
 
 ---
 
@@ -114,7 +114,7 @@ assertThat(reservationRepository.countConfirmed(slotId)).isEqualTo(1);
 
 **진행 결과**
 - [x] 전체 기간/최근 N일 인기 음식점 조회 기준 확정
-- [x] `GET /restaurants/popular?limit=10&recentDays=7` API 추가
+- [x] `GET /restaurants/popular?limit=10` API 추가
 - [x] Spring Cache + Redis 기반 인기 음식점 캐시 적용
 - [x] Restaurant 수정/삭제, Reservation 생성/상태 변경/삭제 시 캐시 무효화 적용
 - [x] Testcontainers Redis 기반 cache hit/miss 테스트 작성
@@ -133,7 +133,24 @@ assertThat(reservationRepository.countConfirmed(slotId)).isEqualTo(1);
 - Job 실행 후 인기도 집계 결과 검증
 - 집계 기준 (최근 N일 예약 수) 경계값 테스트
 
-**완료 기준:** 배치 Job이 인기도를 집계하고 핫 리스트를 갱신한다
+**완료 기준:** 배치 Job이 인기도를 집계하고, 인기 음식점 API가 집계 테이블을 기준으로 응답한다
+
+**진행 결과**
+- [x] Spring Batch 의존성 및 Batch 기본 설정 추가
+- [x] `restaurant_popularity` 집계 테이블 매핑 entity 추가
+- [x] `PopularityPeriodType` enum으로 전체 기간/최근 7일/30일/90일 기준 관리
+- [x] 인기 음식점 집계 repository 추가
+- [x] `popularRestaurantAggregationJob` 추가
+- [x] 기존 집계 삭제 Tasklet Step 추가
+- [x] 전체 기간/최근 7일/30일/90일 집계 Step 추가
+- [x] Reader/Processor/Writer 구조로 집계 결과 저장 구현
+- [x] Batch 완료 후 인기 음식점 Redis 캐시 무효화 연결
+- [x] 인기 음식점 API 조회 소스를 실시간 집계에서 `restaurant_popularity` 조회로 변경
+- [x] API 응답 구조를 `allTime`, `last7Days`, `last30Days`, `last90Days`로 변경
+- [x] `limit` 기본값 10, 최대값 100 적용
+- [x] `@SpringBatchTest` 기반 Job 실행 테스트 작성
+- [x] API/cache 회귀 테스트 수정
+- [x] 전체 테스트 통과 확인
 
 ---
 

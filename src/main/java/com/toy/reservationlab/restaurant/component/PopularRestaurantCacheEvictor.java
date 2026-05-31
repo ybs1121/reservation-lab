@@ -14,7 +14,8 @@ public class PopularRestaurantCacheEvictor {
 
     private static final List<String> CACHE_NAMES = List.of(
             PopularRestaurantCacheNames.ALL_TIME,
-            PopularRestaurantCacheNames.RECENT
+            PopularRestaurantCacheNames.RECENT,
+            PopularRestaurantCacheNames.PERIOD
     );
 
     private final ObjectProvider<StringRedisTemplate> redisTemplateProvider;
@@ -22,7 +23,7 @@ public class PopularRestaurantCacheEvictor {
     @Value("${reservation-lab.popular-restaurant-cache.enabled:false}")
     private boolean cacheEnabled;
 
-    // 인기 캐시 key가 limit/recentDays별로 나뉘어 있어, 4단계 집계 테이블 전까지는 전체 무효화한다.
+    // 기간과 limit별로 캐시 key가 나뉘므로, 집계 갱신 뒤에는 기간 캐시 전체를 비운다.
     public void evictAll() {
         if (!cacheEnabled) {
             return;
