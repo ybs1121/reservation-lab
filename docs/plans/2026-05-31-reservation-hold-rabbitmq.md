@@ -388,4 +388,4 @@ consumer concurrency: 1
 - [x] 요청 상태 조회 API 추가
 - [x] Testcontainers RabbitMQ 통합 테스트 추가
 - [x] k6 비교 시나리오 문서화
-- [ ] README.md 및 docs/stages.md 갱신
+- [x] README.md 및 docs/stages.md 갱신
