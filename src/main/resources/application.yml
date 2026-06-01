@@ -1,6 +1,16 @@
+server:
+  tomcat:
+    accept-count: 200
+    threads:
+      max: 300
 spring:
   application:
     name: reservation-lab
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: embedded
   datasource:
     url: jdbc:h2:mem:reservation_lab;MODE=MySQL;DATABASE_TO_UPPER=false
     driver-class-name: org.h2.Driver
@@ -23,6 +33,15 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 3s
+  rabbitmq:
+    listener:
+      simple:
+        # 동시에 실행할 consumer 수다. 1이면 이 애플리케이션 인스턴스는 한 번에 한 메시지만 처리한다.
+        concurrency: 8
+        # 부하가 늘어도 consumer 수를 자동으로 늘리지 않도록 최대 consumer 수도 1로 고정한다.
+        max-concurrency: 8
+        # consumer가 ack 전에 미리 받아둘 메시지 수다. 1이면 처리 완료 후 다음 메시지를 가져온다.
+        prefetch: 10
   sql:
     init:
       mode: never
@@ -34,6 +53,11 @@ reservation-lab:
     enabled: false
     ttl-seconds: 300
     user-active-hold-max-count: 3
+  reservation-hold-request:
+    enabled: false
+  k6-dashboard:
+    enabled: false
+    k6-path: ${K6_PATH:}
   popular-restaurant-cache:
     enabled: false
 
@@ -43,11 +67,18 @@ spring:
   config:
     activate:
       on-profile: local
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3308}/${MYSQL_DATABASE:reservation_lab}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${MYSQL_USER:reservation}
     password: ${MYSQL_PASSWORD:reservation}
+    hikari:
+      maximum-pool-size: 30
   h2:
     console:
       enabled: false
@@ -63,6 +94,11 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 3s
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:reservation}
+    password: ${RABBITMQ_PASSWORD:reservation}
   sql:
     init:
       mode: never
@@ -74,5 +110,10 @@ reservation-lab:
     enabled: true
     ttl-seconds: 300
     user-active-hold-max-count: 3
+  reservation-hold-request:
+    enabled: true
+  k6-dashboard:
+    enabled: true
+    k6-path: ${K6_PATH:}
   popular-restaurant-cache:
     enabled: true

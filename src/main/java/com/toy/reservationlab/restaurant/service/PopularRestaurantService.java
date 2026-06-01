@@ -1,6 +1,7 @@
 package com.toy.reservationlab.restaurant.service;
 
 import com.toy.reservationlab.restaurant.dto.PopularRestaurantsResponse;
+import com.toy.reservationlab.restaurant.entity.PopularityPeriodType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,16 +10,24 @@ import org.springframework.stereotype.Service;
 public class PopularRestaurantService {
 
     private static final int DEFAULT_LIMIT = 10;
-    private static final int DEFAULT_RECENT_DAYS = 7;
+    private static final int MAX_LIMIT = 100;
 
     private final PopularRestaurantCacheService popularRestaurantCacheService;
 
-    public PopularRestaurantsResponse getPopularRestaurants(Integer limit, Integer recentDays) {
-        int normalizedLimit = limit == null ? DEFAULT_LIMIT : limit;
-        int normalizedRecentDays = recentDays == null ? DEFAULT_RECENT_DAYS : recentDays;
+    public PopularRestaurantsResponse getPopularRestaurants(Integer limit) {
+        int normalizedLimit = normalizeLimit(limit);
         return new PopularRestaurantsResponse(
-                popularRestaurantCacheService.getAllTimePopularRestaurants(normalizedLimit),
-                popularRestaurantCacheService.getRecentPopularRestaurants(normalizedRecentDays, normalizedLimit)
+                popularRestaurantCacheService.getPopularRestaurants(PopularityPeriodType.ALL_TIME, normalizedLimit),
+                popularRestaurantCacheService.getPopularRestaurants(PopularityPeriodType.LAST_7_DAYS, normalizedLimit),
+                popularRestaurantCacheService.getPopularRestaurants(PopularityPeriodType.LAST_30_DAYS, normalizedLimit),
+                popularRestaurantCacheService.getPopularRestaurants(PopularityPeriodType.LAST_90_DAYS, normalizedLimit)
         );
+    }
+
+    private int normalizeLimit(Integer limit) {
+        if (limit == null || limit < 1) {
+            return DEFAULT_LIMIT;
+        }
+        return Math.min(limit, MAX_LIMIT);
     }
 }

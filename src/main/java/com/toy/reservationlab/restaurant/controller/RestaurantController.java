@@ -48,10 +48,9 @@ public class RestaurantController {
 
     @GetMapping("/popular")
     public ApiResponse<PopularRestaurantsResponse> getPopularRestaurants(
-            @RequestParam(required = false) Integer limit,
-            @RequestParam(required = false) Integer recentDays
+            @RequestParam(required = false) Integer limit
     ) {
-        return ApiResponse.success(popularRestaurantService.getPopularRestaurants(limit, recentDays));
+        return ApiResponse.success(popularRestaurantService.getPopularRestaurants(limit));
     }
 
     @PutMapping("/{restaurantId}")
