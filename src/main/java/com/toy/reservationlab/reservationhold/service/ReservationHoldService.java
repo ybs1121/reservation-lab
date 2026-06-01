@@ -54,6 +54,7 @@ public class ReservationHoldService {
     private int userActiveHoldMaxCount;
 
     // 슬롯 capacity를 임시 선점하고, 같은 사용자/슬롯 조합이면 기존 hold를 재사용한다.
+    @Transactional(readOnly = true, noRollbackFor = RuntimeException.class)
     @DistributedLock(key = "'lock:reservation:slot:' + #request.slotId()")
     public ReservationHoldResponse createHold(ReservationHoldCreateRequest request) {
         validateCreatableUser(request.userId());

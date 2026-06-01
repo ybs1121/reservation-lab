@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reservation Hold k6 Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="header">
+      <div>
+        <p class="eyebrow">Local Performance Lab</p>
+        <h1>Reservation Hold k6 Dashboard</h1>
+      </div>
+      <div class="status" id="runStatus">READY</div>
+    </section>
+
+    <section class="layout">
+      <form class="panel controls" id="runForm">
+        <div class="field">
+          <label>Scenario</label>
+          <div class="segmented">
+            <label>
+              <input type="radio" name="scenario" value="sync" checked>
+              <span>Sync API</span>
+            </label>
+            <label>
+              <input type="radio" name="scenario" value="async">
+              <span>Async MQ</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid">
+          <label class="field">
+            <span>Base URL</span>
+            <input id="baseUrl" value="http://localhost:8080">
+          </label>
+          <label class="field">
+            <span>VUs</span>
+            <input id="vus" type="number" min="1" max="200" value="5">
+          </label>
+          <label class="field">
+            <span>Duration</span>
+            <input id="duration" value="10s" pattern="[0-9]+[sm]">
+          </label>
+          <label class="field">
+            <span>Slot Capacity</span>
+            <input id="slotCapacity" type="number" min="1" value="10000">
+          </label>
+          <label class="field">
+            <span>Party Size</span>
+            <input id="partySize" type="number" min="1" value="1">
+          </label>
+          <label class="field">
+            <span>Poll Interval ms</span>
+            <input id="pollIntervalMs" type="number" min="100" value="500">
+          </label>
+        </div>
+
+        <button class="primary" id="startButton" type="submit">Run k6</button>
+      </form>
+
+      <section class="panel guide">
+        <h2>테스트 순서</h2>
+        <ol>
+          <li>`docker compose up -d`로 MySQL, Redis, RabbitMQ를 실행한다.</li>
+          <li>`SPRING_PROFILES_ACTIVE=local`로 애플리케이션을 실행한다.</li>
+          <li>작은 값인 `VUs=5`, `Duration=10s`로 먼저 확인한다.</li>
+          <li>Sync API와 Async MQ를 같은 조건으로 번갈아 실행한다.</li>
+        </ol>
+        <h2>수치 보는 법</h2>
+        <p>Sync는 `hold_http_duration p95`와 성공률을 본다. Async는 접수 시간인 `accept p95`와 실제 완료 시간인 `result ready p95`를 나눠서 본다.</p>
+      </section>
+    </section>
+
+    <section class="summary">
+      <div class="metric" id="primaryMetric">
+        <span class="label">Primary</span>
+        <strong>-</strong>
+        <small>-</small>
+      </div>
+      <div class="metric" id="successMetric">
+        <span class="label">Success</span>
+        <strong>-</strong>
+        <small>-</small>
+      </div>
+      <div class="metric" id="secondaryMetric">
+        <span class="label">Secondary</span>
+        <strong>-</strong>
+        <small>-</small>
+      </div>
+      <div class="metric" id="throughputMetric">
+        <span class="label">Throughput</span>
+        <strong>-</strong>
+        <small>-</small>
+      </div>
+    </section>
+
+    <section class="panel run">
+      <div class="run-header">
+        <div>
+          <h2>Run Detail</h2>
+          <p id="runMeta">No run yet</p>
+        </div>
+        <button class="secondary" id="refreshButton" type="button">Refresh</button>
+      </div>
+      <pre id="commandLine"></pre>
+      <pre id="runOutput"></pre>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
