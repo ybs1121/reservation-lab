@@ -6,7 +6,7 @@
 
 ## 현재 단계
 
-**4단계 완료, 5단계 준비 중**
+**5단계 완료, 6단계 준비 중**
 
 ---
 
@@ -179,6 +179,20 @@ export const options = {
 ```
 
 **완료 기준:** 트래픽 폭주 시 RabbitMQ 큐가 요청을 흡수하고 에러율이 감소한다
+
+**진행 결과**
+- [x] Spring AMQP 의존성 및 RabbitMQ 기본 설정 추가
+- [x] docker compose 로컬 RabbitMQ 구성 추가
+- [x] 비동기 예약 임시 점유 요청 entity/repository 추가
+- [x] `POST /reservation-hold-requests` 요청 접수 API 추가
+- [x] `GET /reservation-hold-requests/{requestId}` 요청 상태 조회 API 추가
+- [x] RabbitMQ publisher, consumer, processor 추가
+- [x] 기존 `ReservationHoldService.createHold()` 재사용 구조로 비동기 처리 연결
+- [x] 비즈니스 실패와 시스템 실패 처리 정책 적용
+- [x] Testcontainers RabbitMQ 기반 통합 테스트 추가
+- [x] 동기/비동기 예약 임시 점유 k6 부하 테스트 스크립트 추가
+- [x] 로컬 k6 성능 대시보드 추가
+- [x] k6 비교 실행 문서 작성
 
 ---
 

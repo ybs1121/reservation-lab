@@ -14,11 +14,15 @@
 - Spring Boot 4.0.6
 - Spring Web MVC
 - Spring Data JPA
+- Spring Batch
+- Spring AMQP
 - Redis
 - Redisson
+- RabbitMQ
 - H2 Database
 - Lombok
 - Gradle
+- k6
 
 ## 실행 환경
 
@@ -33,7 +37,7 @@
 
 ## 현재 단계
 
-**4단계 — 인기 음식점 집계 Batch 적용 진행 중**
+**5단계 — 특정 시점 대규모 트래픽 폭주 대응 완료**
 
 - 0단계 기반 세팅 완료
 - 1단계 Redisson 분산락 적용 완료
@@ -50,6 +54,12 @@
 - 인기 음식점 집계 테이블 및 Spring Batch Job 구성
 - 전체 기간/최근 7일/30일/90일 인기 음식점 집계 저장
 - 인기 음식점 API를 실시간 집계에서 집계 테이블 조회로 변경
+- RabbitMQ 기반 비동기 예약 임시 점유 요청 API 추가
+- 예약 임시 점유 요청 상태 저장 및 조회 API 추가
+- RabbitMQ publisher/consumer/processor 구성
+- Testcontainers RabbitMQ 기반 통합 테스트 작성
+- 동기/비동기 예약 임시 점유 k6 부하 테스트 스크립트 추가
+- 로컬 k6 성능 대시보드 추가
 
 > 단계가 끝날 때마다 이 섹션을 갱신합니다. 다음 단계로 넘어가기 전까지 다른 단계의 작업을 시작하지 않습니다.
 
