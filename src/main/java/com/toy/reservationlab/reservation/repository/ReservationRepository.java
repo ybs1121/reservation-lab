@@ -30,6 +30,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, String
 
     List<Reservation> findByUserIdAndStatusAndDelYn(String userId, ReservationStatus status, String delYn);
 
+    List<Reservation> findByUserIdAndDelYn(String userId, String delYn);
+
     @Query("""
             SELECT COALESCE(SUM(r.partySize), 0)
             FROM Reservation r

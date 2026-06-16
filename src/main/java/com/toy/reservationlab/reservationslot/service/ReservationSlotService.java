@@ -17,6 +17,7 @@ import com.toy.reservationlab.reservationslot.repository.ReservationSlotReposito
 import com.toy.reservationlab.restaurant.entity.Restaurant;
 import com.toy.reservationlab.restaurant.repository.RestaurantRepository;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +61,13 @@ public class ReservationSlotService {
 
     public ReservationSlot getReservationSlot(String slotId) {
         return findReservationSlot(slotId);
+    }
+
+    public List<ReservationSlot> getAvailableSlots(String restaurantId, LocalDate slotDate) {
+        return reservationSlotRepository.findByRestaurantIdAndSlotDateAndDelYn(restaurantId, slotDate, NOT_DELETED)
+                .stream()
+                .filter(ReservationSlot::canCreateReservation)
+                .toList();
     }
 
     @Transactional

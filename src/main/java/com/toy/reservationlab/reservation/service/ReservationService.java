@@ -74,6 +74,10 @@ public class ReservationService {
         return findReservation(reservationId);
     }
 
+    public List<Reservation> getUserReservations(String userId) {
+        return reservationRepository.findByUserIdAndDelYn(userId, "N");
+    }
+
     @Transactional
     public Reservation updateReservationStatus(
             String reservationId,

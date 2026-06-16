@@ -2,6 +2,7 @@ package com.toy.reservationlab.reservationslot.repository;
 
 import com.toy.reservationlab.reservationslot.entity.ReservationSlot;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +13,12 @@ public interface ReservationSlotRepository extends JpaRepository<ReservationSlot
             String restaurantId,
             LocalDate slotDate,
             String slotTime,
+            String delYn
+    );
+
+    List<ReservationSlot> findByRestaurantIdAndSlotDateAndDelYn(
+            String restaurantId,
+            LocalDate slotDate,
             String delYn
     );
 

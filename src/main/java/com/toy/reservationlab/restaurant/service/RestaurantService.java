@@ -10,6 +10,7 @@ import com.toy.reservationlab.restaurant.entity.Restaurant;
 import com.toy.reservationlab.restaurant.entity.RestaurantStatus;
 import com.toy.reservationlab.restaurant.repository.RestaurantRepository;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,10 @@ public class RestaurantService {
 
     public Restaurant getRestaurant(String restaurantId) {
         return findRestaurant(restaurantId);
+    }
+
+    public List<Restaurant> getRestaurants() {
+        return restaurantRepository.findAll();
     }
 
     @Transactional

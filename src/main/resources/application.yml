@@ -6,6 +6,28 @@ server:
 spring:
   application:
     name: reservation-lab
+  ai:
+    # 로컬 Ollama 연동 (보류). Gemini로 전환하며 주석 처리. 되돌리려면 주석 해제.
+    # ollama:
+    #   base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    #   chat:
+    #     options:
+    #       model: "${OLLAMA_MODEL:llama3.1:8b}"
+    #   init:
+    #     # 시작 시 모델 자동 pull 비활성화. 모델은 미리 `ollama pull`로 받아둔다.
+    #     pull-model-strategy: never
+    google:
+      genai:
+        # ai.google.dev에서 발급한 키. 커밋 금지 — 환경변수 GEMINI_API_KEY로 주입.
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          options:
+            # 무료 tier는 Flash 계열만. Pro/2.0-flash는 안 됨(유료/deprecated).
+            model: ${GEMINI_MODEL:gemini-2.5-flash-lite}
+            # Gemini 2.5는 thinking 기본 ON → thinking 토큰이 maxOutputTokens를 먹어
+            # tool 왕복 시 최종 텍스트가 빈 채 MAX_TOKENS로 잘린다. thinking 끄고 출력 예산 확보.
+            thinking-budget: 0
+            max-output-tokens: 8192
   batch:
     job:
       enabled: false
