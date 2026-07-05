@@ -37,6 +37,18 @@
 - `master` — 안정 브랜치
 - `dev` — 작업 브랜치
 
+## 주요 검증 내용
+
+- Redis TTL 기반 예약 임시 점유 생성·조회·해제·확정 흐름
+- Redisson 분산락을 이용한 동일 자원 중복 예약 방지
+- TTL 만료 시점 race condition 테스트
+- Spring Cache + Redis 기반 인기 음식점 조회 캐시
+- Spring Batch 기반 인기 음식점 집계 테이블
+- RabbitMQ 기반 비동기 임시 점유 요청 처리
+- Testcontainers 기반 Redis/RabbitMQ 통합 테스트
+- k6 기반 동기/비동기 요청 부하 테스트
+
+
 ## 현재 단계
 
 **5단계 — 특정 시점 대규모 트래픽 폭주 대응 완료**
