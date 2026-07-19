@@ -1,7 +1,5 @@
 package com.toy.reservationlab.restaurant.batch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.toy.reservationlab.reservation.entity.ReservationStatus;
 import com.toy.reservationlab.reservation.repository.ReservationRepository;
 import com.toy.reservationlab.reservation.service.ReservationService;
@@ -16,9 +14,6 @@ import com.toy.reservationlab.restaurant.repository.RestaurantRepository;
 import com.toy.reservationlab.restaurant.service.RestaurantService;
 import com.toy.reservationlab.user.repository.UserRepository;
 import com.toy.reservationlab.user.service.UserService;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -26,12 +21,18 @@ import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.batch.core.job.parameters.JobParametersBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBatchTest
 @SpringBootTest
@@ -42,7 +43,8 @@ class PopularRestaurantAggregationJobTest {
     private int fixtureSequence;
 
     @Autowired
-    private JobLauncher jobLauncher;
+    private JobOperator jobOperator;
+
 
     @Autowired
     private Job popularRestaurantAggregationJob;
@@ -99,7 +101,7 @@ class PopularRestaurantAggregationJobTest {
         createReservationFixture("batch-last-30", "batch-last-30-restaurant", RUN_AT.minusDays(20));
         createReservationFixture("batch-last-90", "batch-last-90-restaurant", RUN_AT.minusDays(60));
 
-        JobExecution jobExecution = jobLauncher.run(popularRestaurantAggregationJob, jobParameters("periods"));
+        JobExecution jobExecution = jobOperator.start(popularRestaurantAggregationJob, jobParameters("periods"));
 
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
         assertEquals("batch-all-time-restaurant", getPopularRestaurants(PopularityPeriodType.ALL_TIME).getFirst().restaurantId());
@@ -128,7 +130,7 @@ class PopularRestaurantAggregationJobTest {
                 "system"
         );
 
-        JobExecution jobExecution = jobLauncher.run(popularRestaurantAggregationJob, jobParameters("exclude"));
+        JobExecution jobExecution = jobOperator.start(popularRestaurantAggregationJob, jobParameters("exclude"));
 
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
         List<PopularRestaurantResponse> responses = getPopularRestaurants(PopularityPeriodType.ALL_TIME);
@@ -145,7 +147,7 @@ class PopularRestaurantAggregationJobTest {
         createReservationFixture("batch-old", "batch-old-restaurant", RUN_AT.minusDays(1));
         createReservationFixture("batch-new", "batch-new-restaurant", RUN_AT.minusDays(1));
 
-        JobExecution jobExecution = jobLauncher.run(popularRestaurantAggregationJob, jobParameters("tie"));
+        JobExecution jobExecution = jobOperator.start(popularRestaurantAggregationJob, jobParameters("tie"));
 
         assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
         assertEquals("batch-old-restaurant", getPopularRestaurants(PopularityPeriodType.ALL_TIME).getFirst().restaurantId());

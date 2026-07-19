@@ -38,7 +38,7 @@ public class ReservationService {
     private final PopularRestaurantCacheEvictor popularRestaurantCacheEvictor;
 
     @Transactional
-    @DistributedLock(key = "'lock:reservation:slot:' + #slotId")
+    @DistributedLock(keys = "'lock:reservation:slot:' + #slotId")
     public Reservation createReservation(
             String reservationId,
             String slotId,

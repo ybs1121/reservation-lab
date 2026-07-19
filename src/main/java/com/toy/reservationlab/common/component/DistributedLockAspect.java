@@ -3,6 +3,8 @@ package com.toy.reservationlab.common.component;
 import static com.toy.reservationlab.common.component.ErrorCode.LOCK_ACQUIRE_FAILED;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -29,8 +31,7 @@ public class DistributedLockAspect {
     @Around("@annotation(com.toy.reservationlab.common.component.DistributedLock)")
     public Object executeWithLock(ProceedingJoinPoint joinPoint) throws Throwable {
         DistributedLock distributedLock = getDistributedLock(joinPoint);
-        String lockKey = keyParser.parse(joinPoint, distributedLock.key());
-        RLock lock = redissonClient.getLock(lockKey);
+        RLock lock = createLock(joinPoint, distributedLock);
         boolean acquired = tryLock(lock, distributedLock);
         if (!acquired) {
             throw new BizException(LOCK_ACQUIRE_FAILED);
@@ -43,6 +44,24 @@ public class DistributedLockAspect {
                 lock.unlock();
             }
         }
+    }
+
+    /**
+     * 실제 키를 정렬해 호출부의 선언 순서와 관계없이 같은 순서로 락을 획득한다.
+     * 키가 여러 개면 MultiLock이 일부 획득 후 실패한 락까지 함께 정리한다.
+     */
+    private RLock createLock(ProceedingJoinPoint joinPoint, DistributedLock distributedLock) {
+        List<RLock> locks = Arrays.stream(distributedLock.keys())
+                .map(keyExpression -> keyParser.parse(joinPoint, keyExpression))
+                .distinct()
+                .sorted()
+                .map(redissonClient::getLock)
+                .toList();
+
+        if (locks.size() == 1) {
+            return locks.getFirst();
+        }
+        return redissonClient.getMultiLock(locks.toArray(RLock[]::new));
     }
 
     private boolean tryLock(RLock lock, DistributedLock distributedLock) {

@@ -6,7 +6,6 @@ import static com.toy.reservationlab.common.component.ErrorCode.CAPACITY_EXCEEDE
 import static com.toy.reservationlab.common.component.ErrorCode.INVALID_PARTY_SIZE;
 import static com.toy.reservationlab.common.component.ErrorCode.RESERVATION_HOLD_LIMIT_EXCEEDED;
 import static com.toy.reservationlab.common.component.ErrorCode.RESERVATION_HOLD_NOT_FOUND;
-import static com.toy.reservationlab.common.component.ErrorCode.RESERVATION_HOLD_OWNER_MISMATCH;
 
 import com.toy.reservationlab.common.component.BizException;
 import com.toy.reservationlab.common.component.DistributedLock;
@@ -43,6 +42,7 @@ public class ReservationHoldService {
 
     private final ReservationHoldStore reservationHoldStore;
     private final ReservationHoldConfirmService reservationHoldConfirmService;
+    private final ReservationHoldReleaseService reservationHoldReleaseService;
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final UserRepository userRepository;
@@ -55,7 +55,10 @@ public class ReservationHoldService {
 
     // 슬롯 capacity를 임시 선점하고, 같은 사용자/슬롯 조합이면 기존 hold를 재사용한다.
     @Transactional(readOnly = true, noRollbackFor = RuntimeException.class)
-    @DistributedLock(key = "'lock:reservation:slot:' + #request.slotId()")
+    @DistributedLock(keys = {
+            "'lock:reservation-hold:user:' + #request.userId()",
+            "'lock:reservation:slot:' + #request.slotId()"
+    })
     public ReservationHoldResponse createHold(ReservationHoldCreateRequest request) {
         validateCreatableUser(request.userId());
         ReservationSlot slot = findCreatableSlot(request.slotId());
@@ -72,6 +75,7 @@ public class ReservationHoldService {
         return toResponse(hold);
     }
 
+
     // 유효한 hold를 확정 예약으로 전환한다.
     public Reservation confirmHold(String holdId, ReservationHoldConfirmRequest request) {
         ReservationHoldData hold = findHold(holdId);
@@ -81,8 +85,7 @@ public class ReservationHoldService {
     // 사용자가 확정 전에 이탈하거나 취소할 때 임시 점유를 명시적으로 해제한다.
     public void releaseHold(String holdId, String userId) {
         ReservationHoldData hold = findHold(holdId);
-        validateOwner(hold, userId);
-        reservationHoldStore.delete(hold);
+        reservationHoldReleaseService.release(hold, userId);
     }
 
     private ReservationHoldResponse createNewHold(ReservationHoldCreateRequest request, ReservationSlot slot) {
@@ -144,12 +147,6 @@ public class ReservationHoldService {
     private ReservationHoldData findHold(String holdId) {
         return reservationHoldStore.find(holdId)
                 .orElseThrow(() -> new BizException(RESERVATION_HOLD_NOT_FOUND));
-    }
-
-    private void validateOwner(ReservationHoldData hold, String userId) {
-        if (!hold.userId().equals(userId)) {
-            throw new BizException(RESERVATION_HOLD_OWNER_MISMATCH);
-        }
     }
 
     private ReservationHoldResponse toResponse(ReservationHoldData hold) {
