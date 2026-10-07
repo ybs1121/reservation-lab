@@ -3,15 +3,19 @@ package com.toy.reservationlab.reservationhold.service;
 import static com.toy.reservationlab.common.component.ErrorCode.RESERVATION_HOLD_REQUEST_NOT_FOUND;
 
 import com.toy.reservationlab.common.component.BizException;
-import com.toy.reservationlab.reservationhold.component.ReservationHoldRequestCreatedEvent;
+import com.toy.reservationlab.common.outbox.OutboxEvent;
+import com.toy.reservationlab.common.outbox.OutboxEventRepository;
+import com.toy.reservationlab.reservationhold.component.ReservationHoldMessageSerializer;
+import com.toy.reservationlab.reservationhold.component.ReservationHoldRequestedMessage;
+import com.toy.reservationlab.reservationhold.component.ReservationHoldRequestedPayload;
 import com.toy.reservationlab.reservationhold.dto.ReservationHoldRequestCreateRequest;
 import com.toy.reservationlab.reservationhold.dto.ReservationHoldRequestResponse;
 import com.toy.reservationlab.reservationhold.entity.ReservationHoldRequest;
 import com.toy.reservationlab.reservationhold.repository.ReservationHoldRequestRepository;
 import java.util.UUID;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 @ConditionalOnProperty(name = "reservation-lab.reservation-hold-request.enabled", havingValue = "true")
 public class ReservationHoldRequestService {
 
+    private static final String AGGREGATE_TYPE = "RESERVATION_HOLD_REQUEST";
+    private static final String EVENT_TYPE = "RESERVATION_HOLD_REQUESTED";
+    private static final int PAYLOAD_VERSION = 1;
+
     private final ReservationHoldRequestRepository reservationHoldRequestRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final OutboxEventRepository outboxEventRepository;
+    private final ReservationHoldMessageSerializer messageSerializer;
 
     /**
      * 비동기 hold 생성의 첫 단계는 실제 hold를 만들지 않고 요청 상태만 남기는 것이다.
@@ -38,7 +47,29 @@ public class ReservationHoldRequestService {
                 request.userId()
         );
         ReservationHoldRequest savedRequest = reservationHoldRequestRepository.save(holdRequest);
-        applicationEventPublisher.publishEvent(new ReservationHoldRequestCreatedEvent(savedRequest.getRequestId()));
+        LocalDateTime occurredAt = LocalDateTime.now();
+        String eventId = UUID.randomUUID().toString();
+        ReservationHoldRequestedMessage message = new ReservationHoldRequestedMessage(
+                eventId,
+                EVENT_TYPE,
+                PAYLOAD_VERSION,
+                occurredAt.toString(),
+                new ReservationHoldRequestedPayload(
+                        savedRequest.getRequestId(),
+                        savedRequest.getSlotId(),
+                        savedRequest.getUserId(),
+                        savedRequest.getPartySize()
+                )
+        );
+        outboxEventRepository.save(OutboxEvent.create(
+                eventId,
+                AGGREGATE_TYPE,
+                savedRequest.getRequestId(),
+                EVENT_TYPE,
+                PAYLOAD_VERSION,
+                messageSerializer.serialize(message),
+                occurredAt
+        ));
         return ReservationHoldRequestResponse.from(savedRequest);
     }
 

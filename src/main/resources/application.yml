@@ -56,6 +56,10 @@ spring:
       port: ${REDIS_PORT:6379}
       timeout: 3s
   rabbitmq:
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
     listener:
       simple:
         # 동시에 실행할 consumer 수다. 1이면 이 애플리케이션 인스턴스는 한 번에 한 메시지만 처리한다.
@@ -77,6 +81,12 @@ reservation-lab:
     user-active-hold-max-count: 3
   reservation-hold-request:
     enabled: false
+  outbox-publisher:
+    enabled: false
+    polling-delay-millis: 1000
+    batch-size: 100
+    confirm-timeout-seconds: 5
+    stale-timeout-seconds: 30
   k6-dashboard:
     enabled: false
     k6-path: ${K6_PATH:}
@@ -106,7 +116,7 @@ spring:
       enabled: false
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     open-in-view: false
     properties:
       hibernate:
@@ -134,6 +144,12 @@ reservation-lab:
     user-active-hold-max-count: 3
   reservation-hold-request:
     enabled: true
+  outbox-publisher:
+    enabled: true
+    polling-delay-millis: 1000
+    batch-size: 100
+    confirm-timeout-seconds: 5
+    stale-timeout-seconds: 30
   k6-dashboard:
     enabled: true
     k6-path: ${K6_PATH:}

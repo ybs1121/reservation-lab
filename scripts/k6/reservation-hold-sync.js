@@ -8,7 +8,7 @@ const VUS = Number(__ENV.VUS || 20);
 const DURATION = __ENV.DURATION || '30s';
 const SLOT_CAPACITY = Number(__ENV.SLOT_CAPACITY || 10000);
 const PARTY_SIZE = Number(__ENV.PARTY_SIZE || 1);
-const SLOT_DATE = __ENV.SLOT_DATE || '2026-06-01';
+const SLOT_DATE = __ENV.SLOT_DATE || '2026-10-01';
 const SLOT_TIME = __ENV.SLOT_TIME || '18:00';
 const PHONE_RUN_PREFIX = String(Date.now() % 100000).padStart(5, '0');
 

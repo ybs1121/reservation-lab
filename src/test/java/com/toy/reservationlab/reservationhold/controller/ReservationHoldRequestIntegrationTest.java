@@ -9,6 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toy.reservationlab.common.component.ErrorCode;
+import com.toy.reservationlab.common.inbox.InboxMessageRepository;
+import com.toy.reservationlab.common.inbox.InboxMessageStatus;
+import com.toy.reservationlab.common.outbox.OutboxEvent;
+import com.toy.reservationlab.common.outbox.OutboxEventRepository;
+import com.toy.reservationlab.common.outbox.OutboxEventStatus;
 import com.toy.reservationlab.reservationhold.entity.ReservationHoldRequestStatus;
 import com.toy.reservationlab.reservationslot.entity.ReservationSlotStatus;
 import com.toy.reservationlab.reservationslot.service.ReservationSlotService;
@@ -35,6 +40,8 @@ import org.springframework.test.web.servlet.MockMvc;
         "reservation-lab.distributed-lock.enabled=true",
         "reservation-lab.reservation-hold.enabled=true",
         "reservation-lab.reservation-hold-request.enabled=true",
+        "reservation-lab.outbox-publisher.enabled=true",
+        "reservation-lab.outbox-publisher.polling-delay-millis=100",
         "reservation-lab.reservation-hold.ttl-seconds=60",
         "reservation-lab.reservation-hold.user-active-hold-max-count=3"
 })
@@ -74,6 +81,12 @@ class ReservationHoldRequestIntegrationTest {
     @Autowired
     private ReservationSlotService reservationSlotService;
 
+    @Autowired
+    private OutboxEventRepository outboxEventRepository;
+
+    @Autowired
+    private InboxMessageRepository inboxMessageRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -88,6 +101,7 @@ class ReservationHoldRequestIntegrationTest {
         );
 
         JsonNode data = waitUntilStatus(requestId, ReservationHoldRequestStatus.SUCCEEDED);
+        assertOutboxAndInboxProcessed(requestId);
 
         assertThat(data.get("holdId").asText()).isNotBlank();
         assertThat(data.get("failureCode").isNull()).isTrue();
@@ -106,6 +120,7 @@ class ReservationHoldRequestIntegrationTest {
         );
 
         JsonNode data = waitUntilStatus(requestId, ReservationHoldRequestStatus.FAILED);
+        assertOutboxAndInboxProcessed(requestId);
 
         assertThat(data.get("holdId").isNull()).isTrue();
         assertThat(data.get("failureCode").asText()).isEqualTo(ErrorCode.CAPACITY_EXCEEDED.getCode());
@@ -151,6 +166,24 @@ class ReservationHoldRequestIntegrationTest {
         }
 
         throw new AssertionError("expected status " + expectedStatus + " but last data was " + lastData);
+    }
+
+    private void assertOutboxAndInboxProcessed(String requestId) throws InterruptedException {
+        for (int i = 0; i < 30; i++) {
+            OutboxEvent outboxEvent = outboxEventRepository.findAll().stream()
+                    .filter(event -> event.getAggregateId().equals(requestId))
+                    .findFirst()
+                    .orElse(null);
+            if (outboxEvent != null
+                    && outboxEvent.getStatus() == OutboxEventStatus.PUBLISHED
+                    && inboxMessageRepository.findById(outboxEvent.getEventId())
+                    .filter(inbox -> inbox.getStatus() == InboxMessageStatus.PROCESSED)
+                    .isPresent()) {
+                return;
+            }
+            Thread.sleep(200);
+        }
+        throw new AssertionError("Outbox 또는 Inbox 처리가 완료되지 않았다. requestId=" + requestId);
     }
 
     private void createUser(String userId, String phone) {

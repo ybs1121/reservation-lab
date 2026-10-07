@@ -13,14 +13,16 @@ import org.springframework.stereotype.Component;
         """)
 public class ReservationHoldRequestConsumer {
 
-    private final ReservationHoldRequestProcessor reservationHoldRequestProcessor;
+    private final ReservationHoldMessageSerializer messageSerializer;
+    private final ReservationHoldInboxHandler reservationHoldInboxHandler;
 
     /**
      * Queue에서 꺼낸 메시지는 requestId 하나뿐이다.
      * 실제 검증과 hold 생성은 processor로 위임해 listener는 메시지 입구 역할만 맡는다.
      */
     @RabbitListener(queues = "#{T(com.toy.reservationlab.common.config.RabbitMqDestination).RESERVATION_HOLD_REQUEST.getQueueName()}")
-    public void consume(String requestId) {
-        reservationHoldRequestProcessor.process(requestId);
+    public void consume(String message) {
+        ReservationHoldRequestedMessage requestedMessage = messageSerializer.deserialize(message);
+        reservationHoldInboxHandler.handle(requestedMessage);
     }
 }

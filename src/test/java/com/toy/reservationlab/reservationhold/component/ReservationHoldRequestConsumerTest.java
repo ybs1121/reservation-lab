@@ -1,5 +1,6 @@
 package com.toy.reservationlab.reservationhold.component;
 
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
@@ -12,15 +13,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ReservationHoldRequestConsumerTest {
 
     @Mock
-    private ReservationHoldRequestProcessor reservationHoldRequestProcessor;
+    private ReservationHoldMessageSerializer messageSerializer;
+
+    @Mock
+    private ReservationHoldInboxHandler reservationHoldInboxHandler;
 
     @InjectMocks
     private ReservationHoldRequestConsumer reservationHoldRequestConsumer;
 
     @Test
-    void queue에서_받은_requestId를_processor에_위임한다() {
-        reservationHoldRequestConsumer.consume("hold-request-1");
+    void queue에서_받은_JSON_메시지를_역직렬화해_Inbox_handler에_위임한다() {
+        ReservationHoldRequestedMessage message = new ReservationHoldRequestedMessage(
+                "message-1",
+                "RESERVATION_HOLD_REQUESTED",
+                1,
+                "2026-07-19T14:00:00",
+                new ReservationHoldRequestedPayload("request-1", "slot-1", "user-1", 1)
+        );
+        when(messageSerializer.deserialize("message-json")).thenReturn(message);
 
-        verify(reservationHoldRequestProcessor).process("hold-request-1");
+        reservationHoldRequestConsumer.consume("message-json");
+
+        verify(reservationHoldInboxHandler).handle(message);
     }
 }
